@@ -1,4 +1,3 @@
-[![][Logo]][1] 
 # [MyBatis-ActiveSQL][1]
 
 ## MyBatis-ActiveSQL简介
