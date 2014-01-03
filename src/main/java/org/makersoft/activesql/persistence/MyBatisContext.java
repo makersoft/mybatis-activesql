@@ -9,14 +9,12 @@
 package org.makersoft.activesql.persistence;
 
 import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * Class description goes here.
- * 
- * @version 2013年12月27日 下午1:49:31
- * @author Feng Kuok
+ * MyBatis SqlSession context.
  */
 public class MyBatisContext {
 	private static final MyBatisContext INSTANCE = new MyBatisContext();
@@ -27,8 +25,13 @@ public class MyBatisContext {
 		return INSTANCE;
 	}
 
-	@Autowired
-	public void setSqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate) {
+	@Autowired(required = false)
+	public final void setSqlSessionFactory(SqlSessionFactory sqlSessionFactory) {
+		sqlSession = new SqlSessionTemplate(sqlSessionFactory);
+	}
+
+	@Autowired(required = false)
+	public final void setSqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate) {
 		sqlSession = sqlSessionTemplate;
 	}
 
@@ -47,24 +50,24 @@ public class MyBatisContext {
 
 	// --- query method ---
 	public static <T> T find(Class<T> clazz, Long id) {
-		return sqlSession.selectOne(clazz.getName() + ".getById", id);
+		return sqlSession.<T>selectOne(clazz.getName() + ".get", id);
 	}
 
-//	public static List<? extends ActiveRecord> find(Class<?> clazz, Long... ids) {
-//		return sqlSession.selectList(clazz.getName() + ".findByIds", ids);
-//	}
-//
-//	public static long count(Class<?> clazz) {
-//		return sqlSession.selectOne(clazz.getName() + ".count");
-//	}
-//
-//	public static List<?> findAll(Class<?> clazz) {
-//		return sqlSession.selectList(clazz.getName() + ".findAll");
-//	}
-//
-//	public static List<? extends ActiveRecord> findEntityEntries(Class<?> clazz, int firstResult,
-//			int maxResults) {
-//		return sqlSession.selectList(clazz.getName() + ".findAll", null, new RowBounds(firstResult,
-//				maxResults));
-//	}
+	// public static List<? extends ActiveRecord> find(Class<?> clazz, Long... ids) {
+	// return sqlSession.selectList(clazz.getName() + ".findByIds", ids);
+	// }
+	//
+	// public static long count(Class<?> clazz) {
+	// return sqlSession.selectOne(clazz.getName() + ".count");
+	// }
+	//
+	// public static List<?> findAll(Class<?> clazz) {
+	// return sqlSession.selectList(clazz.getName() + ".findAll");
+	// }
+	//
+	// public static List<? extends ActiveRecord> findEntityEntries(Class<?> clazz, int firstResult,
+	// int maxResults) {
+	// return sqlSession.selectList(clazz.getName() + ".findAll", null, new RowBounds(firstResult,
+	// maxResults));
+	// }
 }

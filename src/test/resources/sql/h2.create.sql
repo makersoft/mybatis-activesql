@@ -9,3 +9,9 @@ create table t_user (
     updated_at timestamp null,
     primary key (id)
 );
+
+insert into t_user(user_name, password, birth_day, created_at, updated_at) values('a','a', now(), now(), now());
+insert into t_user(user_name, password, birth_day, created_at, updated_at) values('b','b', now(), now(), now());
+insert into t_user(user_name, password, birth_day, created_at, updated_at) values('c','c', now(), now(), now());
+insert into t_user(user_name, password, birth_day, created_at, updated_at) values('d','d', now(), now(), now());
+insert into t_user(user_name, password, birth_day, created_at, updated_at) values('e','e', now(), now(), now());

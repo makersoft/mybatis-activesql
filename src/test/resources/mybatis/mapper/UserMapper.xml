@@ -16,19 +16,19 @@
 		id, user_name, password, birth_day, created_at, updated_at
 	</sql>
 	<!-- 
-	<insert id="insert" useGeneratedKeys="true" keyColumn="id" keyProperty="id" parameterType="org.makersoft.mybatis.activesql.model.User">
-		insert into t_user(id, user_name, password, birth_day, created_at, updated_at)
-		values (#{id}, #{userName}, #{password}, now(), now(), now())
+	<insert id="insertUser" useGeneratedKeys="true" keyColumn="id" keyProperty="id" parameterType="org.makersoft.activesql.model.User">
+		insert into t_user(user_name, password, birth_day, created_at, updated_at)
+		values (#{userName}, 'xxxxxxxxxxxxxxxxxxxxxxx', now(), now(), now())
 	</insert>
 	
-	<insert id="insertNew" useGeneratedKeys="true" keyColumn="id" keyProperty="id"  parameterType="org.makersoft.mybatis.activesql.model.User">
+	<insert id="insertNew" useGeneratedKeys="true" keyColumn="id" keyProperty="id"  parameterType="org.makersoft.activesql.model.User">
         insert into t_user
             (${pair.key})
         values
             (#{pair.Value})
     </insert>
     
-    <insert id="insertSelective" useGeneratedKeys="true" keyColumn="id" keyProperty="id"  parameterType="org.makersoft.mybatis.activesql.model.User">
+    <insert id="insertSelective" useGeneratedKeys="true" keyColumn="id" keyProperty="id"  parameterType="org.makersoft.activesql.model.User">
         INSERT INTO t_user
 		<trim prefix="(" suffix=")" suffixOverrides="," > 
 			<if test="userName != null" >user_name,</if>
@@ -72,7 +72,7 @@
 		where id = #{id}
 	</update>
 	 
-	<select id="get" resultType="org.makersoft.mybatis.activesql.model.User" parameterType="int">
+	<select id="get" resultType="org.makersoft.activesql.model.User" parameterType="int">
 		SELECT id AS id,user_name AS userName,password AS password,birth_day AS birthDay,created_at AS createdAt,updated_At AS updatedAt 
 		FROM t_user WHERE id =#{id}
 	</select>

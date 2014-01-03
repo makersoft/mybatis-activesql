@@ -79,6 +79,10 @@ public class GenericStatementBuilder extends BaseBuilder {
 	//
 	private Class<?> mapperType;
 	
+	private Entity entity;
+	
+	private String namespace;
+	
 	public GenericStatementBuilder(Configuration configuration, Class<?> entityClass) {
 		super(configuration);
 		this.entityClass = entityClass;
@@ -86,13 +90,16 @@ public class GenericStatementBuilder extends BaseBuilder {
 		String resource = entityClass.getName().replace('.', '/') + ".java (best guess)";
 		assistant = new MapperBuilderAssistant(configuration, resource);
 		
-		mapperType = entityClass.getAnnotation(Entity.class).mapper();
+		entity = entityClass.getAnnotation(Entity.class);
+		mapperType = entity.mapper();
 		
 		if(!mapperType.isAssignableFrom(Void.class)) {
-			assistant.setCurrentNamespace(mapperType.getName());
+			namespace = mapperType.getName();
 		} else {
-			assistant.setCurrentNamespace(entityClass.getName());
+			namespace = entityClass.getName();
 		}
+		
+		assistant.setCurrentNamespace(namespace);
 		
 		databaseId = super.getConfiguration().getDatabaseId();
 		lang = super.getConfiguration().getDefaultScriptingLanuageInstance();
@@ -136,7 +143,7 @@ public class GenericStatementBuilder extends BaseBuilder {
 		});
 	}
 	
-	protected String getColumnNameByField(Field field){
+	private String getColumnNameByField(Field field){
 		Column column = field.getAnnotation(Column.class);
 		if(column == null){
 			return CaseFormatUtils.camelToUnderScore(field.getName());
@@ -145,7 +152,7 @@ public class GenericStatementBuilder extends BaseBuilder {
 		}
 	}
 	
-	protected String getTestByField(Field field) {
+	private String getTestByField(Field field) {
 		Column column = field.getAnnotation(Column.class);
 		if(column != null && StringUtils.isNotBlank(column.test())){
 			return column.test();
@@ -176,7 +183,7 @@ public class GenericStatementBuilder extends BaseBuilder {
 		String insertStatementId = "insert";
 		String deleteStatementId = "delete";
 		String updateStatementId = "update";
-		String selectStatementId = "select";
+		String selectStatementId = "get";
 		
 		if(!mapperType.isAssignableFrom(Void.class)) {
 			List<Method> insertMethods = ReflectUtils.findMethodsAnnotatedWith(mapperType, Insert.class);
@@ -213,10 +220,21 @@ public class GenericStatementBuilder extends BaseBuilder {
 			
 		}
 		
-		buildInsert(insertStatementId);
-		buildDelete(deleteStatementId);
-		buildUpdate(updateStatementId);
-		buildSelect(selectStatementId);
+		if(!super.getConfiguration().hasStatement(namespace + "." + insertStatementId)) {
+			buildInsert(insertStatementId);
+		}
+		
+		if(!super.getConfiguration().hasStatement(namespace + "." + deleteStatementId)) {
+			buildDelete(deleteStatementId);
+		}
+		
+		if(!super.getConfiguration().hasStatement(namespace + "." + updateStatementId)) {
+			buildUpdate(updateStatementId);
+		}
+		
+		if(!super.getConfiguration().hasStatement(namespace + "." + selectStatementId)) {
+			buildSelect(selectStatementId);
+		}
 		
 	}
 	
@@ -234,16 +252,19 @@ public class GenericStatementBuilder extends BaseBuilder {
 		String keyProperty = null;
 		String keyColumn = null;
 		
-		String keyStatementId = entityClass.getName() + ".insert" + SelectKeyGenerator.SELECT_KEY_SUFFIX;
-		if (configuration.hasKeyGenerator(keyStatementId)) {
-			keyGenerator = configuration.getKeyGenerator(keyStatementId);
-		} else {
-			Id id = AnnotationUtils.findDeclaredAnnotation(Id.class, entityClass);
-			keyGenerator = id.generatedKeys() ? new Jdbc3KeyGenerator() : new NoKeyGenerator();
+		Id id = AnnotationUtils.findDeclaredAnnotation(Id.class, entityClass);
+		if(id != null) {
+			String keyStatementId = entityClass.getName() + ".insert" + SelectKeyGenerator.SELECT_KEY_SUFFIX;
+			if (configuration.hasKeyGenerator(keyStatementId)) {
+				keyGenerator = configuration.getKeyGenerator(keyStatementId);
+			} else {
+				keyGenerator = id.generatedKeys() ? new Jdbc3KeyGenerator() : new NoKeyGenerator();
+			}
 			
 			keyProperty = idField.getName();
 			keyColumn = StringUtils.isBlank(id.column()) ? CaseFormatUtils.camelToUnderScore(idField.getName()) : id.column();
 		}
+		
 
 		List<SqlNode> contents = new ArrayList<SqlNode>();
 		contents.add(this.getInsertSql());
@@ -369,12 +390,12 @@ public class GenericStatementBuilder extends BaseBuilder {
 	//get
 	private void buildSelect(String statementId){
 		Integer fetchSize  = null;
-		Integer timeout = null;
+		Integer timeout = entity.timeout() == -1 ? null : entity.timeout();
 		Class<?> resultType = entityClass;
 		
 		//~~~~~~~~~~~~~~~~~
-		boolean flushCache = false;
-		boolean useCache = true;
+		boolean flushCache = entity.flushCache();
+		boolean useCache = entity.useCache();
 		boolean resultOrdered = false;
 		KeyGenerator keyGenerator = new NoKeyGenerator();
 		

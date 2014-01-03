@@ -13,30 +13,30 @@ import java.io.Serializable;
 import org.makersoft.activesql.persistence.MyBatisContext;
 
 /**
- * Class description goes here.
+ * Active SQL basic model.
  */
-public abstract class ActiveSQLModel<PK, T> implements Serializable{
+public abstract class ActiveSQLModel implements Serializable {
 
 	private static final long serialVersionUID = -7720270093702372957L;
-	
+
 	// --- persist method ---
-	public int create() {
-		return MyBatisContext.insert(this);
-	}
-	
-	public int update(){
-		return MyBatisContext.update(this);
+	public boolean create() {
+		return MyBatisContext.insert(this) == 1;
 	}
 
-	public int remove() {
-		return MyBatisContext.delete(this);
+	public boolean update() {
+		return MyBatisContext.update(this) == 1;
 	}
-	
-	public static <T> T load(Long id){
-		return null;
+
+	public boolean remove() {
+		return MyBatisContext.delete(this) == 1;
 	}
-	
+
+//	public static <T> T load(Long id) {
+//		throw new UnsupportedOperationException("Unimplement static method exception!!!");
+//	}
+
 	public static <T> T get(Long id) {
-		return null;
+		throw new UnsupportedOperationException("Unimplement static method exception!!!");
 	}
 }

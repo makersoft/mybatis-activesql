@@ -29,5 +29,5 @@ public interface UserMapper {
 	int update(User user);
 	
 	@Select
-	User get(User user);
+	User get(Long id);
 }

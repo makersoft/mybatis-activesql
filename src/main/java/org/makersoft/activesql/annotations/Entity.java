@@ -17,4 +17,12 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface Entity {
 	Class<?> mapper() default Void.class;
+
+	boolean useCache() default true;
+
+	boolean flushCache() default false;
+
+	int fetchSize() default -1;
+
+	int timeout() default -1;
 }
